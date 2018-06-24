@@ -1,4 +1,4 @@
-# openSMILE Config Files README
+# openSMILE Config Files
 
 This extension adds syntax highlighting, diagnostics and IntelliSense features for openSMILE configuration files (.conf, .inc) to Visual Studio Code.
 
