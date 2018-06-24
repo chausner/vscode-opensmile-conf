@@ -1,0 +1,89 @@
+{
+    "name": "opensmile-config-files",
+    "displayName": "openSMILE Config File Support",
+    "description": "Adds syntax highlighting, diagnostics and IntelliSense features for openSMILE configuration files",
+    "version": "1.0.0",
+    "publisher": "chausner",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chausner/vscode-opensmile-conf"
+    },
+    "engines": {
+        "vscode": "^1.23.0"
+    },
+    "license": "SEE LICENSE IN LICENSE",
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:opensmileconf"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "opensmileconf",
+                "aliases": [
+                    "openSMILE configuration",
+                    "opensmileconf"
+                ],
+                "extensions": [
+                    ".conf",
+                    ".inc"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "opensmileconf",
+                "scopeName": "text.opensmileconf",
+                "path": "./syntaxes/opensmileconf.tmLanguage.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "opensmile-config-files.init",
+                "title": "Initialize the plugin",
+                "category": "openSMILE Config Files",
+                "description": "Initializes the plugin by retrieving component information from SMILExtract."
+            },
+            {
+                "command": "opensmile-config-files.showGraph",
+                "title": "Show component graph",
+                "category": "openSMILE Config Files",
+                "description": "Visualizes the currently open openSMILE configuration file as a graph."
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "openSMILE Config Files configuration",
+            "properties": {
+                "opensmile-config-files.symbolsPath": {
+                    "type": "string",
+                    "default": "assets/symbols.json",
+                    "description": "Path to a JSON file with symbol information.",
+                    "scope": "resource"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6"
+    },
+    "dependencies": {
+        "@types/dagre": "^0.7.40",
+        "dagre": "^0.8.2"
+    }
+}

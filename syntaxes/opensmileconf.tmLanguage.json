@@ -1,0 +1,153 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "openSMILE configuration",
+	"patterns": [
+		{
+			"include": "#section-header"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#include-directive"
+		},
+		{
+			"include": "#field-assignment"
+		}
+	],
+	"repository": {
+		"section-header": {
+			"patterns": [{
+				"name": "entity.name.section.opensmileconf",
+				"match": "(\\[(\\w+):(\\w+)\\])",
+				"captures": {
+					"2": {
+						"name": "variable.other.opensmileconf"
+					},
+					"3": {
+						"name": "entity.name.class.opensmileconf"
+					}
+				}
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.opensmileconf",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.opensmileconf",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.double-slash.opensmileconf",
+					"match": "(//.*)$"
+				},
+				{
+					"name": "comment.line.number-sign.opensmileconf",
+					"match": "(#.*)$"
+				},
+				{
+					"name": "comment.line.semicolon.opensmileconf",
+					"match": "^\\s*(;.*)$"
+				}
+			]
+		},
+		"include-directive": {
+			"patterns": [
+				{
+					"name": "meta.preprocessor.opensmileconf",
+					"match": "(\\\\\\{.*\\})"
+				}
+			]
+		},
+		"command-option": {
+			"patterns": [
+				{
+					"name": "meta.preprocessor.opensmileconf",
+					"match": "(\\\\cm\\[(.*)(\\((.*)\\))?(\\{(.*)\\})?(:(.*))?\\])"
+				}
+			]
+		},
+		"field-assignment": {
+			"patterns": [
+				{
+					"match": "^\\s*((.*)\\s*=\\s*(.*))",
+					"captures": {
+						"2": {
+							"patterns": [
+								{
+									"include": "#assignment-left"
+								}
+							]
+						},
+						"3": {
+							"patterns": [
+								{
+									"include": "#assignment-right"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"assignment-left": {
+			"patterns": [
+				{
+					"name": "variable.other.member",
+					"match": "(.*)"
+				}
+			]
+		},
+		"assignment-right": {
+			"patterns": [
+				{
+					"match": "((.+)(\\s*(;)\\s*(.*))*)",
+					"captures": {
+						"2": {
+							"patterns": [
+								{
+									"include": "#values"
+								}
+							]
+						},
+						"4": {
+							"name": "keyword.operator"
+						},
+						"5": {
+							"patterns": [
+								{
+									"include": "#values"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"values": {
+			"patterns": [
+				{
+					"name": "constant.numeric.integer",
+					"match": "\\b(\\-?\\d+)\\b"
+				},
+				{
+					"name": "constant.numeric.float",
+					"match": "\\b(\\-?\\d*\\.\\d*)\\b"
+				},
+				{
+					"include": "#command-option"
+				}
+			]
+		}
+	},
+	"scopeName": "text.opensmileconf"
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .node text {
+            pointer-events: none;
+        }
+
+        svg {
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        /* vscode-light */
+        body.vscode-light .node text {
+            fill: black;
+        }
+
+        body.vscode-light .node rect, body.vscode-light .node ellipse {
+            stroke: #666;
+            stroke-width: 2px;
+        }
+
+        body.vscode-light .node.component rect {
+            fill: #CCCEDB;/*#DDD*/
+        }
+
+        body.vscode-light .node.level ellipse {
+            fill: #DDD;
+        }
+
+        body.vscode-light .edgePath path {
+            stroke: #666;
+            stroke-width: 2px;
+        }
+
+        body.vscode-light .arrowhead {
+            stroke: #666;
+            fill: #666;
+        }
+
+        body.vscode-light .edgePath.messages path {
+            stroke: rgb(0, 140, 255);
+            stroke-width: 2px;
+            stroke-dasharray: 15, 5;
+        }
+
+        body.vscode-light .arrowheadMessages {
+            stroke: rgb(0, 140, 255);
+            fill: rgb(0, 140, 255);
+        }
+
+        /* vscode-dark */
+        body.vscode-dark .node text {
+            fill: white;
+        }
+
+        body.vscode-dark .node rect, body.vscode-dark .node ellipse {
+            stroke: #999;
+            stroke-width: 2px;
+        }
+
+        body.vscode-dark .node.component rect {
+            fill: #3F3F46; /*#383838*/
+        }
+
+        body.vscode-dark .node.level ellipse {
+            fill: #383838;
+        }
+
+        body.vscode-dark .edgePath path {
+            stroke: #999;
+            stroke-width: 2px;
+        }
+
+        body.vscode-dark .arrowhead {
+            stroke: #999;
+            fill: #999;
+        }
+
+        body.vscode-dark .edgePath.messages path {
+            stroke: #9CDCFE;
+            stroke-width: 2px;
+            stroke-dasharray: 15, 5;
+        }
+
+        body.vscode-dark .arrowheadMessages {
+            stroke: #9CDCFE;
+            fill: #9CDCFE;
+        }
+    </style>
+</head>
+<body style="margin: 0px; padding: 0px; height: 100%; width: 100%; text-align: center;">
+    <!--<script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>-->
+    <script src="$d3ResourcePath$" charset="utf-8"></script>
+    <!--<script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>-->
+    <script src="$dagreD3ResourcePath$"></script>
+    <svg id="svg" style="width: 99vw; height: 99vh;" />
+    <script>
+        var vscode = acquireVsCodeApi();
+
+        document.addEventListener('DOMContentLoaded', event => {
+            vscode.postMessage({
+                id: 'pageLoaded'
+            });
+        });
+
+        window.addEventListener('message', event => {
+            var message = event.data;
+
+            if (message.id === 'showGraph') {
+                showGraph(message.graph);
+            }
+        });
+
+        function showGraph(graph) {
+            var g = dagreD3.graphlib.json.read(graph);
+
+            g.setGraph({}).setDefaultEdgeLabel(function() { return {}; });  
+
+            var render = new dagreD3.render();
+
+            var svg = d3.select("svg");
+            var svgGroup = svg.append("g");
+
+            // Set up zoom support
+            var zoom = d3.zoom().on("zoom", function() {
+                svgGroup.attr("transform", d3.event.transform);
+            });
+            svg.call(zoom);
+
+            render(svgGroup, g);
+
+            svgGroup.selectAll("g.node").on("click", function(e) {
+                vscode.postMessage({
+                    id: 'nodeClicked',
+                    nodeName: e
+                });
+            });
+
+            // Center the graph
+            var svgSize = document.getElementById("svg").getBoundingClientRect();
+            var initialScale = Math.min(svgSize.width / g.graph().width, svgSize.height / g.graph().height) * 0.9;
+            var cx = (svgSize.width - g.graph().width * initialScale) / 2;
+            var cy = (svgSize.height - g.graph().height * initialScale) / 2;
+            svg.call(zoom.transform, d3.zoomIdentity.translate(cx, cy).scale(initialScale));
+        }
+    </script>
+</body>
+</html>
