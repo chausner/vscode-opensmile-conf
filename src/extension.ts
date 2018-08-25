@@ -12,9 +12,13 @@ import { GraphDrawing } from './graphDrawing';
 import { OSCDiagnostics } from './oscDiagnostics';
 
 export let extensionContext: vscode.ExtensionContext;
+export let diagnosticCollection: vscode.DiagnosticCollection;
 
 export function activate(context: vscode.ExtensionContext) {
     extensionContext = context;
+
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('opensmile-diags');
+    context.subscriptions.push(diagnosticCollection);
 
     context.subscriptions.push(vscode.languages.registerHoverProvider('opensmileconf', new OSCHoverProvider()));
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider('opensmileconf', new OSCCompletionItemProvider(), '.', ':', '=', ' '));

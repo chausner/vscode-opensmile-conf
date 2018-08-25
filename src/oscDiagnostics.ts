@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { Diagnostic, TextDocument } from 'vscode';
 import { configParser, SectionHeaderContext, FieldAssignmentContext, Component } from './configParser';
 import { symbolCache } from './symbolCache';
+import { diagnosticCollection } from './extension';
 
 export class OSCDiagnostics {
     public static async apply(document: TextDocument): Promise<void> {
@@ -13,7 +14,6 @@ export class OSCDiagnostics {
 		await this.checkRequiredFieldsArePresent(document, diagnostics);
 		await this.warnForBackwardCompatibilityFlags(document, diagnostics);
 
-		let diagnosticCollection = vscode.languages.createDiagnosticCollection('opensmile-diags');
 		diagnosticCollection.set(document.uri, diagnostics);
 	}
 
