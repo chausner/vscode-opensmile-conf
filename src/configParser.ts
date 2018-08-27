@@ -234,7 +234,13 @@ export class ConfigParser {
         for (let line = 0; line < document.lineCount; line++) {
             let parserContext = configParser.getContext(document, line);
             if (parserContext instanceof IncludeDirectiveContext && descendIntoIncludedFiles) {
-                let fullPath = path.join(vscode.workspace.rootPath as string, parserContext.fileName);
+                let fullPath: string;
+                if (path.isAbsolute(parserContext.fileName)) {
+                    fullPath = parserContext.fileName;
+                } else {
+                    fullPath = path.join(path.dirname(document.fileName), parserContext.fileName);
+                }
+                // TODO: before giving up, openSMILE also tries interpreting the path as relative to the last included file 
                 if (fs.existsSync(fullPath)) {
                     let includedDocument = await vscode.workspace.openTextDocument(fullPath);
                     await this.iterate(includedDocument, descendIntoIncludedFiles, callback);
