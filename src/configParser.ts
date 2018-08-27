@@ -257,14 +257,15 @@ export class ConfigParser {
 
     public async parse(document: TextDocument): Promise<Component[]> {
         let currentComponent: Component | undefined = undefined;
-        let components: Component[] = [];
+        let components: Map<String, Component> = new Map<string, Component>();
 
         await this.iterate(document, true, parserContext => {
             if (parserContext instanceof SectionHeaderContext) {
-                if (currentComponent) {
-                    components.push(currentComponent);
+                currentComponent = components.get(parserContext.componentInstance);
+                if (!currentComponent) {
+                    currentComponent = new Component([parserContext], []);
+                    components.set(currentComponent.instanceName, currentComponent);
                 }
-                currentComponent = new Component([parserContext], []);
             } else if (parserContext instanceof FieldAssignmentContext) {
                 if (currentComponent) {
                     currentComponent.fieldAssignments.push(parserContext);
@@ -272,11 +273,7 @@ export class ConfigParser {
             }
         });
 
-        if (currentComponent) {
-            components.push(currentComponent);
-        }
-
-        return components;
+        return Array.from(components.values());
     }
 }
 
