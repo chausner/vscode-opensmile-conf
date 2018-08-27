@@ -39,13 +39,13 @@ export class OSCHoverProvider implements HoverProvider {
 				let fieldExpressionPart = dotIndex !== -1 ? context.field.substr(0, dotIndex) : context.field;
 				let field = Component.resolveFieldExpression(sectionHeaderContext.componentType, fieldExpressionPart);
 				if (field) {
-					let detail = new MarkdownString();					
-					detail.appendText("(" + field.type + ") " + field.field);
+					let header = new MarkdownString();		
+					header.appendText("(" + field.type + ") " + field.field);
 					if (field.default) {
-						detail.appendText(" [default: " + field.default + "]");
+						header.appendText(" [default: " + field.default + "]");
 					}
-					detail.appendMarkdown('\n\n' + Utils.convertToMarkdown(field.description).value);
-					return new Hover(detail);
+					let description = Utils.convertToMarkdown(field.description);
+					return new Hover([header, description]);
 				} 				
 			} 			
 		}
