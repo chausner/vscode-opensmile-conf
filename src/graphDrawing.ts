@@ -9,12 +9,22 @@ import { symbolCache } from './symbolCache';
 
 export class GraphDrawing {
     public async showGraph(): Promise<void> {
-        let document = vscode.window.visibleTextEditors[0].document;
+        let textEditor = vscode.window.activeTextEditor;
+        if (!textEditor || textEditor.document.languageId !== 'opensmileconf') {
+            await vscode.window.showErrorMessage('To run this command, an openSMILE configuration file must be loaded in the active editor.');
+            return;
+        }        
         
-        let graph = await this.buildGraph(document);
+        let graph = await this.buildGraph(textEditor.document);
         let graphJson = dagre.graphlib.json.write(graph);
 
-        let webviewPanel = vscode.window.createWebviewPanel('opensmileConfGraph', 'openSMILE component graph', vscode.ViewColumn.Three, { 
+        let title: string;
+        if (!textEditor.document.isUntitled) {
+            title = `openSMILE component graph (${path.basename(textEditor.document.fileName)})`;
+        } else {
+            title = 'openSMILE component graph';
+        }
+        let webviewPanel = vscode.window.createWebviewPanel('opensmileConfGraph', title, vscode.ViewColumn.Three, { 
             enableScripts: true,
             localResourceRoots: [vscode.Uri.file(extensionContext.extensionPath)]
         });
@@ -28,11 +38,12 @@ export class GraphDrawing {
             } else if (message.id === 'nodeClicked') {
                 let node = graph.node(message.nodeName);
                 if (node.class === 'component') {
-                    let definitionLocation: SectionHeaderContext = graph.node(message.nodeName).definitionLocation;
+                    let definitionLocation: SectionHeaderContext = node.definitionLocation;
                     vscode.window.showTextDocument(definitionLocation.document, { 
+                        viewColumn: (textEditor as vscode.TextEditor).viewColumn,
                         selection: definitionLocation.componentInstanceRange,
                         preserveFocus: true, 
-                        preview: true 
+                        preview: true
                     });
                 }
             }
