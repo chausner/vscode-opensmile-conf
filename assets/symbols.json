@@ -5939,7 +5939,8 @@
     {
       "description": "This component computes the fundamental frequency via the Sub-Harmonic-Sampling (SHS) method (this is related to the Harmonic Product Spectrum method).", 
       "writesToLevels": [
-        "writer.dmLevel"
+        "writer.dmLevel",
+        "shsWriter.dmLevel"
       ], 
       "fields": [
         {
