@@ -1272,6 +1272,9 @@
       "readsFromLevels": [
         "reader.dmLevel"
       ], 
+      "sendsMessagesToComponents": [
+        "messageRecp"
+      ],
       "baseComponent": "cDataProcessor"
     }, 
     {
@@ -2341,7 +2344,10 @@
       ], 
       "component": "cLibsvmLiveSink", 
       "description": "This component classifies data from dataMemory 'on-the-fly' using the LibSVM or LibLINEAR library. Loading of ASCII and binary LibSVM models is supported, as well as application of LibSVM scale files and openSMILE feature selection lists.", 
-      "baseComponent": "cDataSink"
+      "baseComponent": "cDataSink",
+      "sendsMessagesToComponents": [
+        "resultRecp"
+      ]
     }, 
     {
       "readsFromLevels": [
@@ -2426,7 +2432,10 @@
       ], 
       "component": "cSvmSink", 
       "description": "This is an example of a cDataSink descendant. It reads data from the data memory and prints it to the console. This component is intended as a template for developers.", 
-      "baseComponent": "cDataSink"
+      "baseComponent": "cDataSink",
+      "sendsMessagesToComponents": [
+        "resultRecp"
+      ]
     }, 
     {
       "readsFromLevels": [
@@ -5934,6 +5943,9 @@
       "readsFromLevels": [
         "reader.dmLevel"
       ], 
+      "sendsMessagesToComponents": [
+        "directionMsgRecp"
+      ],
       "baseComponent": "cDataProcessor"
     }, 
     {
@@ -9249,6 +9261,457 @@
       ],
       "writesToLevels": [
         "writer.dmLevel"
+      ]
+    },
+    {
+      "component": "cJuliusSink",
+      "description": "keyword spotter using Julius decoder",
+      "baseComponent": "cDataSink",
+      "readsFromLevels": [
+        "reader.dmLevel"
+      ],
+      "sendsMessagesToComponents": [
+        "juliusResultRecp",
+        "kwsResultRecp"
+      ],
+      "fields": [
+        {
+          "field": "configfile",
+          "type": "string",
+          "description": "Julius configfile to load (path is relative to smile executable)",
+          "default": "kws.cfg"
+        },
+        {
+          "field": "logfile",
+          "type": "string",
+          "description": "Julius logfile (default=(null) : no log file)",
+          "default": null
+        },
+        {
+          "field": "debug",
+          "type": "numeric",
+          "description": "1 = show julius debug log output, 0 = don't show",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "preSil",
+          "type": "numeric",
+          "description": "extra (silence) amount of data at beginning of turn to keep (in seconds)",
+          "default": 0.3
+        },
+        {
+          "field": "postSil",
+          "type": "numeric",
+          "description": "extra (silence) amount of data at end of turn to keep (in seconds)",
+          "default": 0.4
+        },
+        {
+          "field": "nopass2",
+          "type": "numeric",
+          "description": "1 = do not perform pass2 (you must also set the '-1pass' option in the julius config file!)",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "printResult",
+          "type": "numeric",
+          "description": "print output packages to console (1/0=yes/no)",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "juliusResultRecp",
+          "type": "string",
+          "typeHint": "componentInstance", 
+          "description": "component(s) to send 'juliusResult' messages to (use , to separate multiple recepients), leave blank (NULL) to not send any messages. The 'juliusResult' message contains the full julius result package, which includes the full word string, alignments (if available) and the word scores as well as am and lm scores.",
+          "default": null
+        },
+        {
+          "field": "kwsResultRecp",
+          "type": "string",
+          "typeHint": "componentInstance", 
+          "description": "component(s) to send 'asrKeywordOutput' messages to (use , to separate multiple recepients), leave blank (NULL) to not send any messages. The keyword result package only contains selected keywords (given in 'keywordList') from the full julius result package.",
+          "default": null
+        },
+        {
+          "field": "keywordList",
+          "type": "string",
+          "description": "name of text file to load keyword list from. The file must contain the keywords (all uppercase) sorted in alphabetical order, each keyword on a line.",
+          "default": null
+        },
+        {
+          "field": "excludeWords",
+          "type": "string",
+          "description": "array of strings (words) to exclude from result packages. Typically you would use this to exclude sentence start and end marks such as <s> or </s>. The default is an empty list, i.e. nothing will be excluded.",
+          "default": null
+        },
+        {
+          "field": "noTurns",
+          "type": "numeric",
+          "description": "1 = don't use turn segmentation info, simply pass all available input data to julius (you can either do VAD with julius then, or use this feature in offline mode when you use presegmented turns) (0 = segment input based on cTurnDetector messages).",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "offlineMode",
+          "type": "numeric",
+          "description": "1 = off-line evaluation mode (this changes the exit behaviour of the decoder; in online mode the decoder will always return 1 (busy) when decoding; in off-line mode it will return 0 if it is processing if not in the EOI processing loop. This option will also set maxTurnQue=0 (infinite).",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "maxTurnQue",
+          "type": "numeric",
+          "description": "maximum number of speech turns to hold in que, set this to 0 (infinite) for offline evaluations, and 2 (or more) for online mode",
+          "default": 2,
+          "allowedValues": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "field": "decoderThreadPriority",
+          "type": "numeric",
+          "description": "the thread priority of the decoder thread (currently only supported on windows), values -15 (idle) to 15 (real-time), while 0 is normal. This should be lower as or equal to the priority of the openSMILE main thread!",
+          "default": 0
+        }
+      ]
+    },
+    {
+      "component": "cOpenslesSource",
+      "description": "This component reads opensl audio buffer input into datamemory.",
+      "baseComponent": "cDataSource",
+      "writesToLevels": [
+        "writer.dmLevel"
+      ],
+      "fields": [
+        {
+          "field": "monoMixdown",
+          "type": "numeric",
+          "description": "Mix down all channels to 1 mono channel (1=on, 0=off)",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "sampleRate",
+          "type": "numeric",
+          "description": "Set/force the sampling rate that is assigned to the input data.",
+          "default": 16000
+        },
+        {
+          "field": "channels",
+          "type": "numeric",
+          "description": "Set/force the number of input (recording) channels",
+          "default": 1
+        },
+        {
+          "field": "outFieldName",
+          "type": "string",
+          "description": "Set the name of the output field, containing the pcm data",
+          "default": "pcm"
+        },
+        {
+          "field": "nBits",
+          "type": "numeric",
+          "description": "The number of bits per sample and channel",
+          "default": 16
+        },
+        {
+          "field": "nBPS",
+          "type": "numeric",
+          "description": "The number of bytes per sample and channel (0=determine automatically from nBits)",
+          "default": 0
+        },
+        {
+          "field": "audioBuffersize",
+          "type": "numeric",
+          "description": "The size of the portaudio recording buffer in samples (overwrites audioBuffersize_sec, if set)",
+          "default": 0
+        },
+        {
+          "field": "audioBuffersize_sec",
+          "type": "numeric",
+          "description": "size of the portaudio recording buffer in seconds. This value has influence on the system latency. Setting it too high might introduce a high latency. A too low value might lead to dropped samples and reduced performance.",
+          "default": 0.05
+        },
+        {
+          "field": "agcEnabled",
+          "type": "numeric",
+          "description": "1/0 = enable automatic gain control for input audio",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "agcTarget",
+          "type": "numeric",
+          "description": "Target peak level for AGC, if enabled.",
+          "default": 0.5
+        },
+        {
+          "field": "agcDebug",
+          "type": "numeric",
+          "description": "1/0 = enable agc debugging output to log.",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cJniMessageInterface",
+      "description": "Component for transferring smile component messages from native C to Java via JNI interface.",
+      "fields": [
+        {
+          "field": "sendMessagesInTick",
+          "type": "numeric",
+          "description": "1/0 enable/disable sending of messages synchronized in tick(). If set to 0, a background thread will be started which will send messages from the queue in the background (NOT YET IMPLEMENTED).",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "JNIcallbackClass",
+          "type": "string",
+          "description": "Fully qualified Java name of class in APP which handles callbacks. Must be changed to the app namespace and domain.",
+          "default": "java/com/audeering/testapp01/SmileJNIcallbacks"
+        },
+        {
+          "field": "JNIstringReceiverMethod",
+          "type": "string",
+          "description": "Name of method which receives string messages in JNIcallbackClass. Default should not need to be changed, if class wasn't changed.",
+          "default": "receiveText"
+        },
+        {
+          "field": "debugPrintJson",
+          "type": "numeric",
+          "description": "1 = debug print to smile log the formatted json before sending.",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cOpenCVSource",
+      "description": "Captures frames from either webcam or file stream, extracts a square region containing the face and creates a LBP, HSV and optical flow histogram.",
+      "baseComponent": "cDataSource",
+      "writesToLevels": [
+        "writer.dmLevel"
+      ],
+      "fields": [
+        {
+          "field": "display",
+          "type": "numeric",
+          "description": "Show original and extracted video",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]
+        },
+        {
+          "field": "videoSource",
+          "type": "string",
+          "description": "Choose Video Source: WEBCAM or FILE",
+          "default": "WEBCAM"       
+        },
+        {
+          "field": "filename",
+          "type": "string",
+          "description": "Filename of video, if VideoSource = FILE",
+          "default": ""       
+        },
+        {
+          "field": "fps",
+          "type": "numeric",
+          "description": "Frames per second",
+          "default": 30.0      
+        },
+        {
+          "field": "face_cascade_path",
+          "type": "string",
+          "description": "Path to OpenCV face cascade xml file",
+          "default": "/usr/share/opencv/data/lbpcascades/lbpcascade_frontalface.xml"     
+        },
+        {
+          "field": "eyes_cascade_path",
+          "type": "string",
+          "description": "Path to OpenCV eyes cascade xml file",
+          "default": "/usr/share/opencv/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"  
+        },
+        {
+          "field": "extract_face",
+          "type": "numeric",
+          "description": "Extract face and eyes?",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "extract_hsv_histogram",
+          "type": "numeric",
+          "description": "Extract HSV histogram?",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "extract_lbp_histogram",
+          "type": "numeric",
+          "description": "Extract LBP histogram?",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "extract_optical_flow",
+          "type": "numeric",
+          "description": "Extract optical flow histogram?",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "include_face_features",
+          "type": "numeric",
+          "description": "Include face features (eye position + distance etc.) in feature vector?",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "ignore_invalid_frames",
+          "type": "numeric",
+          "description": "Ignore invalid frames (e.g. when no face is detected. Cave: Might lead to synchronisation errors.",
+          "default": 1,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "face_width",
+          "type": "numeric",
+          "description": "Width/height of extracted face square",
+          "default": 60       
+        },
+        {
+          "field": "lbp_uniformpatterns",
+          "type": "numeric",
+          "description": "Use uniform patterns for LBP histogram",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "hsv_histogram_h_bins",
+          "type": "numeric",
+          "description": "HSV histogram: Hue bins",
+          "default": 50       
+        },
+        {
+          "field": "hsv_histogram_s_bins",
+          "type": "numeric",
+          "description": "HSV histogram: Saturation bins",
+          "default": 50       
+        },
+        {
+          "field": "hsv_histogram_v_bins",
+          "type": "numeric",
+          "description": "HSV histogram: Value bins",
+          "default": 50       
+        },
+        {
+          "field": "of_histogram_bins",
+          "type": "numeric",
+          "description": "Optical flow histogram: Bins",
+          "default": 10       
+        },
+        {
+          "field": "normalize_histograms",
+          "type": "numeric",
+          "description": "Normalize histograms (L1-norm)",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "of_histogram_max_flow",
+          "type": "numeric",
+          "description": "Optical flow histogram: Max flow",
+          "default": 0.2       
+        },
+        {
+          "field": "of_histogram_downsample",
+          "type": "numeric",
+          "description": "Optical flow histogram: Downsample",
+          "default": 0.3       
+        },
+        {
+          "field": "use_lbpc",
+          "type": "numeric",
+          "description": "Use LBP-C (circular LBP)",
+          "default": 0,
+          "allowedValues": [
+            0,
+            1
+          ]       
+        },
+        {
+          "field": "lbpc_radius",
+          "type": "numeric",
+          "description": "LBP-C radius",
+          "default": 1       
+        },
+        {
+          "field": "lbpc_points",
+          "type": "numeric",
+          "description": "LBP-C points (currently only 8 points supported)",
+          "default": 8       
+        }
       ]
     }
   ]
