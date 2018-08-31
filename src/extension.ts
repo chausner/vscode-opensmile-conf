@@ -17,6 +17,8 @@ export let diagnosticCollection: vscode.DiagnosticCollection;
 export function activate(context: vscode.ExtensionContext) {
     extensionContext = context;
 
+    loadSymbolCache();
+
     diagnosticCollection = vscode.languages.createDiagnosticCollection('opensmile-diags');
     context.subscriptions.push(diagnosticCollection);
 
@@ -30,7 +32,11 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
 
-    loadSymbolCache();
+    // documents from the last session may get reopened before our extension gets activated
+    // to account for this case, iterate through all already opened documents
+    for (let document of vscode.workspace.textDocuments) {
+        onDidOpenTextDocument(document);
+    }
 }
 
 export function deactivate() {
