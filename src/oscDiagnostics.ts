@@ -35,16 +35,19 @@ export class OSCDiagnostics {
 						}
 					} else {
 						if (field.allowedValues) {
-							let validValue: boolean;
-							if (field.type === 'string' || field.type === 'char') {
-								validValue = (field.allowedValues as any).indexOf(parserContext.value) >= 0;
-							} else if (field.type === 'numeric') {
-								validValue = (field.allowedValues as any).indexOf(parseFloat(parserContext.value)) >= 0;
-							} else {
-								validValue = true;
-							}
-							if (!validValue) {
-								diagnostics.push(new Diagnostic(parserContext.valueRange, `"${parserContext.value}" is not a valid value for field "${parserContext.field}" of component "${sectionHeaderContext.componentType}".`, vscode.DiagnosticSeverity.Error));
+							// do not show any warnings if the field value contains a command-line option directive
+							if (!parserContext.value.includes('\\cm[')) {
+								let validValue: boolean;
+								if (field.type === 'string' || field.type === 'char') {
+									validValue = (field.allowedValues as any).indexOf(parserContext.value) >= 0;
+								} else if (field.type === 'numeric') {
+									validValue = (field.allowedValues as any).indexOf(parseFloat(parserContext.value)) >= 0;
+								} else {
+									validValue = true;
+								}
+								if (!validValue) {
+									diagnostics.push(new Diagnostic(parserContext.valueRange, `"${parserContext.value}" is not a valid value for field "${parserContext.field}" of component "${sectionHeaderContext.componentType}".`, vscode.DiagnosticSeverity.Error));
+								}
 							}
 						}
 					}					
