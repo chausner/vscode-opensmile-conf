@@ -119,12 +119,15 @@ export class GraphDrawing {
                     for (let field of componentInfo.sendsMessagesToComponents) {
                         let fieldValue = component.getFieldValue(field);
                         if (fieldValue && fieldValue.value) {
-                            let targetComponents = Component.parseArrayValue(fieldValue.value, 'string') as string[];
+                            let targetComponents = (fieldValue.value as string).split(',');
                             for (let targetComponent of targetComponents) {
-                                g.setEdge('component_' + component.instanceName, 'component_' + targetComponent, {
-                                    class: 'messages',
-                                    arrowheadClass: 'arrowheadMessages'
-                                });
+                                // we need to make sure that the component nodes actually exist, otherwise the graph would not get drawn at all
+                                if (components.some(c => c.instanceName === targetComponent)) {
+                                    g.setEdge('component_' + component.instanceName, 'component_' + targetComponent, {
+                                        class: 'messages',
+                                        arrowheadClass: 'arrowheadMessages'
+                                    });
+                                }
                             }
                         }
                     }
