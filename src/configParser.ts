@@ -126,6 +126,10 @@ export class Component {
 
     public static parseArrayValue(value: string, fieldType: string): string[] | number[] | undefined {
         let parts = value.split(';').map(s => s.trim());
+        // if value ends with a semicolon, don't include the empty part at the end
+        if (parts.length >= 1 && parts[parts.length - 1] === '') {
+            parts.length--;
+        }
         let values = parts.map(s => Component.parseFieldValue(s, fieldType));
         if (values.indexOf(undefined) !== -1) {
             return undefined;
