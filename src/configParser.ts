@@ -43,7 +43,7 @@ export class SectionHeaderContext extends ConfigParserContext {
 }
 
 export class FieldAssignmentContext extends ConfigParserContext {
-    private static regex = /^(\s*)([a-zA-Z0-9_\.\[\]]+)(\s*=\s*)(.*)/;
+    private static regex = /^(\s*)([a-zA-Z0-9_\.\[\]]+)(\s*=\s*)(.*[^\s]|)/;
 
     private constructor(document: TextDocument, line: number, public field: string, public fieldRange: Range, public value: string, public valueRange: Range) {
         super(document, line);
