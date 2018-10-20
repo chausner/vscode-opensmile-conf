@@ -66,8 +66,10 @@ export class GraphDrawing {
 
         var g = new dagre.graphlib.Graph();
 
-        // Set an object for the graph label
-        g.setGraph({});
+        // set graph properties
+        g.setGraph({
+            ranker: 'tight-tree' // both 'network-simplex' and 'tight-tree' give acceptable results
+        });        
         
         // Default to assigning a new object as a label for each new edge.
         g.setDefaultEdgeLabel(function() { return {}; });
@@ -79,6 +81,8 @@ export class GraphDrawing {
             g.setNode('component_' + component.instanceName, { 
                 label: `${component.instanceName}:${component.componentType}`, 
                 shape: 'rect', 
+                rx: 5,
+                ry: 5,
                 class: 'component',
                 definitionLocation: component.sectionHeaders[0]
             });
@@ -145,7 +149,7 @@ export class GraphDrawing {
             });
         }
         
-        //dagre.layout(g);
+        dagre.layout(g);
 
         return g;
     }
