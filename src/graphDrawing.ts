@@ -15,8 +15,8 @@ export class GraphDrawing {
             return;
         }        
         
-        let graph = await this.buildGraph(textEditor.document);
-        let graphJson = dagre.graphlib.json.write(graph);
+        let graph: dagre.graphlib.Graph | undefined;        
+        let graphPromise: Promise<dagre.graphlib.Graph> = this.buildGraph(textEditor.document);
 
         let title: string;
         if (!textEditor.document.isUntitled) {
@@ -29,14 +29,16 @@ export class GraphDrawing {
             localResourceRoots: [vscode.Uri.file(extensionContext.extensionPath)]
         });
 
-        webviewPanel.webview.onDidReceiveMessage(message => {
+        webviewPanel.webview.onDidReceiveMessage(async message => {
             if (message.id === 'pageLoaded') {
+                graph = await graphPromise;
+                let graphJson = dagre.graphlib.json.write(graph);
                 webviewPanel.webview.postMessage({
                     id: 'showGraph',
                     graph: graphJson
                 });
             } else if (message.id === 'nodeClicked') {
-                let node = graph.node(message.nodeName);
+                let node = (graph as dagre.graphlib.Graph).node(message.nodeName);
                 if (node.class === 'component') {
                     let definitionLocation: SectionHeaderContext = node.definitionLocation;
                     vscode.window.showTextDocument(definitionLocation.document, { 
