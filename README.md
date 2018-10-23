@@ -37,6 +37,10 @@ This extension can be customized using the following settings:
 
 ## Release Notes
 
+### 1.1.1
+
+This release comes with a few tweaks to the appearance of the component graphs and fixes several bugs related to graph drawing and config file parsing.
+
 ### 1.1.0
 
 In this release, symbol information for all remaining components of openSMILE 2.3 has been added. A new diagnostic to detect mismatches between component declarations and component sections is implemented. Several bugs have been fixed. See CHANGELOG.md for details.

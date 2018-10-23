@@ -3,6 +3,19 @@ All notable changes to the "opensmile-config-files" extension will be documented
 
 ## [Unreleased]
 
+## [1.1.1] - 2018-10-23
+### Changed
+- Improve the loading speed of the component graph
+- Draw smooth edges in the graph, change rectangular nodes to rounded rectangles, use another layouting method for slightly better graph layouts
+- Show status text while graph is still loading
+
+### Fixed
+
+- Fix bug where the graph would not be drawn if a component sent messages to multiple recipients
+- Fix bug where the graph would not be drawn if a specified message recipient did not exist
+- Fix bug where whitespace at the end of field assignments would not be discarded
+- Properly handle array field assignments that end with a semicolon
+
 ## [1.1.0] - 2018-09-01
 ### Added
 - Diagnostic: check name and type in component declarations match the component sections
