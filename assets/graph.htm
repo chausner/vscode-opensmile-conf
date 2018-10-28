@@ -125,7 +125,8 @@
 
             // We cannot set the curve attribute earlier as it is not serialized to JSON
             g.edges().forEach(function(e) {
-                g.setEdge(e, {curve: d3.curveBasis});
+                var edge = g.edge(e);
+                edge.curve = d3.curveBasis;
             });
 
             var render = new dagreD3.render();
