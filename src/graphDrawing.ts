@@ -83,7 +83,7 @@ export class GraphDrawing {
                 shape: 'rect', 
                 rx: 5,
                 ry: 5,
-                class: 'component',
+                class: this.getNodeColor(component),
                 definitionLocation: component.sectionHeaders[0]
             });
         }
@@ -152,5 +152,34 @@ export class GraphDrawing {
         dagre.layout(g);
 
         return g;
+    }
+
+    private getNodeColor(component: Component): string {
+        let ancestor = this.findAncestorComponent(component.componentType, [
+            "cDataSource", "cDataSink", "cDataProcessor", "cFunctionals"
+        ]);
+        switch (ancestor) {
+            case 'cDataSource': 
+                return "green-component";
+            case 'cDataSink': 
+                return "red-component";
+            case 'cDataProcessor': 
+                return "blue-component";
+            case "cFunctionals":
+                return "yellow-component";
+            default: 
+                return 'blue-component';            
+        }
+    }
+
+    private findAncestorComponent(component: string, ancestors: string[]): string | undefined {
+        if (ancestors.indexOf(component) !== -1) {
+            return component;
+        }
+        let componentInfo = symbolCache.lookupComponent(component);
+        if (componentInfo === undefined || componentInfo.baseComponent === undefined) {
+            return undefined;
+        }
+        return this.findAncestorComponent(componentInfo.baseComponent, ancestors);
     }
 }
