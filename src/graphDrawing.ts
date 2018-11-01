@@ -14,13 +14,14 @@ export class GraphDrawing {
             await vscode.window.showErrorMessage('To run this command, an openSMILE configuration file must be loaded in the active editor.');
             return;
         }        
+        let document = textEditor.document;
         
         let graph: dagre.graphlib.Graph | undefined;        
-        let graphPromise: Promise<dagre.graphlib.Graph> = this.buildGraph(textEditor.document);
+        let graphPromise: Promise<dagre.graphlib.Graph> = this.buildGraph(document, false);
 
         let title: string;
-        if (!textEditor.document.isUntitled) {
-            title = `openSMILE component graph (${path.basename(textEditor.document.fileName)})`;
+        if (!document.isUntitled) {
+            title = `openSMILE component graph (${path.basename(document.fileName)})`;
         } else {
             title = 'openSMILE component graph';
         }
@@ -31,16 +32,20 @@ export class GraphDrawing {
         });
 
         webviewPanel.webview.onDidReceiveMessage(async message => {
-            if (message.id === 'pageLoaded') {
-                graph = await graphPromise;
+            if (message.id === 'generateGraph') {
+                if (graphPromise !== undefined && message.excludeLevels === false) {
+                    graph = await graphPromise;
+                } else {
+                    graph = await this.buildGraph(document, message.excludeLevels);
+                }      
                 let graphJson = dagre.graphlib.json.write(graph);
                 webviewPanel.webview.postMessage({
-                    id: 'showGraph',
+                    id: 'graphGenerated',
                     graph: graphJson
                 });
             } else if (message.id === 'nodeClicked') {
                 let node = (graph as dagre.graphlib.Graph).node(message.nodeName);
-                if (node.class === 'component') {
+                if (node.class.endsWith('component')) {
                     let definitionLocation: SectionHeaderContext = node.definitionLocation;
                     vscode.window.showTextDocument(definitionLocation.document, { 
                         viewColumn: (textEditor as vscode.TextEditor).viewColumn,
@@ -52,16 +57,16 @@ export class GraphDrawing {
             }
         }, undefined, extensionContext.subscriptions);
 
-        fs.readFile(extensionContext.asAbsolutePath('assets/graph.htm'), 'utf8', (err, s) => {
-            let d3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'd3.v4.min.js')).with({ scheme: 'vscode-resource' });
-            let dagreD3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'dagre-d3.min.js')).with({ scheme: 'vscode-resource' });
-            s = s.replace('$d3ResourcePath$', d3ResourcePath.toString());
-            s = s.replace('$dagreD3ResourcePath$', dagreD3ResourcePath.toString());    
-            webviewPanel.webview.html = s;
+        fs.readFile(extensionContext.asAbsolutePath('assets/graph.htm'), 'utf8', (err, html) => {
+            if (!err) {
+                let assetsPath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets')).with({ scheme: 'vscode-resource' });
+                html = html.replace(/\$assets\$/g, assetsPath.toString());
+                webviewPanel.webview.html = html;
+            }
         });
     }
 
-    private async buildGraph(document: TextDocument): Promise<dagre.graphlib.Graph> {
+    private async buildGraph(document: TextDocument, excludeLevels: boolean): Promise<dagre.graphlib.Graph> {
         let components = await configParser.parse(document);
 
         var g = new dagre.graphlib.Graph();
@@ -90,6 +95,8 @@ export class GraphDrawing {
         }
 
         let levels: Set<string> = new Set<string>();
+        let readersOfLevels: Map<string, string[]> = new Map<string, string[]>();
+        let writersOfLevels: Map<string, string[]> = new Map<string, string[]>();
 
         for (let component of components) {
             let componentInfo = symbolCache.lookupComponent(component.componentType);
@@ -101,9 +108,16 @@ export class GraphDrawing {
                             let readerLevels = Component.parseArrayValue(fieldValue.value, 'string') as string[];
                             for (let level of readerLevels) {
                                 levels.add(level);
-                                g.setEdge('level_' + level, 'component_' + component.instanceName, {
-                                    arrowheadClass: 'arrowhead'
-                                });  
+                                if (!readersOfLevels.has(level)) {
+                                    readersOfLevels.set(level, [component.instanceName]);
+                                } else {
+                                    (readersOfLevels.get(level) as string[]).push(component.instanceName);
+                                }
+                                if (!excludeLevels) {
+                                    g.setEdge('level_' + level, 'component_' + component.instanceName, {
+                                        arrowheadClass: 'arrowhead'
+                                    });  
+                                }
                             }
                         }
                     }
@@ -115,9 +129,16 @@ export class GraphDrawing {
                             let writerLevels = Component.parseArrayValue(fieldValue.value, 'string') as string[];
                             for (let level of writerLevels) {
                                 levels.add(level);
-                                g.setEdge('component_' + component.instanceName, 'level_' + level, {
-                                    arrowheadClass: 'arrowhead'
-                                });
+                                if (!writersOfLevels.has(level)) {
+                                    writersOfLevels.set(level, [component.instanceName]);
+                                } else {
+                                    (writersOfLevels.get(level) as string[]).push(component.instanceName);
+                                }
+                                if (!excludeLevels) {
+                                    g.setEdge('component_' + component.instanceName, 'level_' + level, {
+                                        arrowheadClass: 'arrowhead'
+                                    });
+                                }
                             }
                         }
                     }
@@ -142,12 +163,32 @@ export class GraphDrawing {
             }
         }
 
-        for (let level of levels) {
-            g.setNode('level_' + level, { 
-                label: level,
-                shape: 'ellipse', 
-                class: 'level' 
-            });
+        if (!excludeLevels) {
+            for (let level of levels) {
+                g.setNode('level_' + level, { 
+                    label: level,
+                    shape: 'ellipse', 
+                    class: 'level' 
+                });
+            }
+        } else {
+            let levelsWithReadersAndWriters = new Set<string>();
+            for (let componentName of readersOfLevels.keys()) {
+                if (writersOfLevels.has(componentName)) {
+                    levelsWithReadersAndWriters.add(componentName);
+                }
+            }
+
+            for (let level of levelsWithReadersAndWriters) {
+                for (let componentName1 of (writersOfLevels.get(level) as string[])) {
+                    for (let componentName2 of (readersOfLevels.get(level) as string[])) {
+                        g.setEdge('component_' + componentName1, 'component_' + componentName2, {
+                            label: level,
+                            arrowheadClass: 'arrowheadMessages'
+                        });
+                    }
+                }
+            }
         }
         
         dagre.layout(g);
@@ -165,7 +206,7 @@ export class GraphDrawing {
             case 'cDataSink': 
                 return "red-component";
             case 'cDataProcessor': 
-                return "blue-component";
+                return "blue-component";        
             case "cFunctionals":
                 return "yellow-component";
             default: 

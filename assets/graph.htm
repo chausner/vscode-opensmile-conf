@@ -149,36 +149,72 @@
             stroke: #9CDCFE;
             fill: #9CDCFE;
         }
+
+        .menuBar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin-top: 16px;
+            margin-right: 16px;
+            padding: 0px;
+            text-align: right;
+        }
+
+        .menuBar button {
+            background-color: var(--vscode-button-background);
+            border: none;
+            color:  var(--vscode-button-foreground);
+            padding: 8px 8px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+        }
+
+        .menuBar button img {
+            filter: invert(100%);
+        }
     </style>
 </head>
 <body>
-    <!--<script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>-->
-    <script src="$d3ResourcePath$" charset="utf-8"></script>
-    <!--<script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>-->
-    <script src="$dagreD3ResourcePath$"></script>
     <svg id="svg">
         <text id="statusText" x="50%" y="50%" alignment-baseline="middle" text-anchor="middle">Generating graph...</text>
     </svg>
+    <div class="menuBar">
+        <button title="Reset zoom" onclick="resetZoom()"><img src="$assets$/expand-arrows-alt.svg" /></button>
+        <button title="Zoom in" onclick="zoomIn()"><img src="$assets$/search-plus.svg" /></button>
+        <button title="Zoom out" onclick="zoomOut()"><img src="$assets$/search-minus.svg" /></button>
+        <label style="display: block; margin-top: 8px"><input id="levelVisbilityCheckBox" type="checkbox" onchange="toggleLevelVisibilty()" checked>Show data memory levels</label>
+    </div>
+    <script src="$assets$/d3.v4.min.js" charset="utf-8"></script>
+    <script src="$assets$/dagre-d3.min.js"></script>
     <script>
         var vscode = acquireVsCodeApi();
+        var g;
+        var zoom;
+        var excludeLevels = false;
 
         document.addEventListener('DOMContentLoaded', event => {            
             vscode.postMessage({
-                id: 'pageLoaded'
+                id: 'generateGraph',
+                excludeLevels: excludeLevels
             });
         });
 
         window.addEventListener('message', event => {
             var message = event.data;
 
-            if (message.id === 'showGraph') {
-                document.getElementById("statusText").remove();
+            if (message.id === 'graphGenerated') {
+                document.getElementById("statusText").style.visibility = "collapse";
                 showGraph(message.graph);
             }
         });
 
         function showGraph(graph) {
-            var g = dagreD3.graphlib.json.read(graph);
+            g = dagreD3.graphlib.json.read(graph);
 
             // We cannot set the curve attribute earlier as it is not serialized to JSON
             g.edges().forEach(function(e) {
@@ -192,7 +228,7 @@
             var svgGroup = svg.append("g");
 
             // Set up zoom support
-            var zoom = d3.zoom().on("zoom", function() {
+            zoom = d3.zoom().on("zoom", function() {
                 svgGroup.attr("transform", d3.event.transform);
             });
             svg.call(zoom);
@@ -206,12 +242,47 @@
                 });
             });
 
-            // Center the graph
-            var svgSize = document.getElementById("svg").getBoundingClientRect();
-            var initialScale = Math.min(svgSize.width / g.graph().width, svgSize.height / g.graph().height) * 0.9;
-            var cx = (svgSize.width - g.graph().width * initialScale) / 2;
-            var cy = (svgSize.height - g.graph().height * initialScale) / 2;
-            svg.call(zoom.transform, d3.zoomIdentity.translate(cx, cy).scale(initialScale));
+            resetZoom();
+        }
+
+        function removeGraph() {
+            var svgGroup = d3.select("svg g");
+            svgGroup.remove();
+        }
+
+        function resetZoom() {
+            if (zoom !== undefined) {
+                var svg = d3.select("svg");
+                var svgSize = document.getElementById("svg").getBoundingClientRect();
+                var initialScale = Math.min(svgSize.width / g.graph().width, svgSize.height / g.graph().height) * 0.9;
+                var cx = (svgSize.width - g.graph().width * initialScale) / 2;
+                var cy = (svgSize.height - g.graph().height * initialScale) / 2;
+                svg.call(zoom.transform, d3.zoomIdentity.translate(cx, cy).scale(initialScale));
+            }
+        }
+
+        function zoomIn() {
+            if (zoom != undefined) {
+                var svg = d3.select("svg");
+                svg.call(zoom.scaleBy, 1.33);
+            }
+        }
+
+        function zoomOut() {
+            if (zoom != undefined) {
+                var svg = d3.select("svg");
+                svg.call(zoom.scaleBy, 1 / 1.33);
+            }
+        }
+
+        function toggleLevelVisibilty() {
+            excludeLevels = !document.getElementById("levelVisbilityCheckBox").checked;
+            removeGraph();
+            document.getElementById("statusText").style.visibility = "visible";
+            vscode.postMessage({
+                id: 'generateGraph',
+                excludeLevels: excludeLevels
+            });
         }
     </script>
 </body>
