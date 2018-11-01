@@ -26,6 +26,7 @@ export class GraphDrawing {
         }
         let webviewPanel = vscode.window.createWebviewPanel('opensmileConfGraph', title, vscode.ViewColumn.Three, { 
             enableScripts: true,
+            retainContextWhenHidden: true,
             localResourceRoots: [vscode.Uri.file(extensionContext.extensionPath)]
         });
 
@@ -51,14 +52,13 @@ export class GraphDrawing {
             }
         }, undefined, extensionContext.subscriptions);
 
-        let s: string = fs.readFileSync(extensionContext.asAbsolutePath('assets/graph.htm'), 'utf8');
-
-        let d3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'd3.v4.min.js')).with({ scheme: 'vscode-resource' });
-        let dagreD3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'dagre-d3.min.js')).with({ scheme: 'vscode-resource' });
-        s = s.replace('$d3ResourcePath$', d3ResourcePath.toString());
-        s = s.replace('$dagreD3ResourcePath$', dagreD3ResourcePath.toString());
-
-        webviewPanel.webview.html = s;
+        fs.readFile(extensionContext.asAbsolutePath('assets/graph.htm'), 'utf8', (err, s) => {
+            let d3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'd3.v4.min.js')).with({ scheme: 'vscode-resource' });
+            let dagreD3ResourcePath = vscode.Uri.file(path.join(extensionContext.extensionPath, 'assets', 'dagre-d3.min.js')).with({ scheme: 'vscode-resource' });
+            s = s.replace('$d3ResourcePath$', d3ResourcePath.toString());
+            s = s.replace('$dagreD3ResourcePath$', dagreD3ResourcePath.toString());    
+            webviewPanel.webview.html = s;
+        });
     }
 
     private async buildGraph(document: TextDocument): Promise<dagre.graphlib.Graph> {
