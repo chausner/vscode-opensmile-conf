@@ -79,7 +79,8 @@ export class GraphDrawing {
                 continue;
             }
             g.setNode('component_' + component.instanceName, { 
-                label: `${component.instanceName}:${component.componentType}`, 
+                label: `${component.instanceName}<br><b>${component.componentType}</b>`, 
+                labelType: 'html',
                 shape: 'rect', 
                 rx: 5,
                 ry: 5,
