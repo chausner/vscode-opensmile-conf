@@ -37,6 +37,10 @@ This extension can be customized using the following settings:
 
 ## Release Notes
 
+### 1.2.0
+
+This release contains several features and enhancements for the component graphs. Nodes are now colored depending on the type of component (source/sink/data processor/functionals), and a new option is introduced to hide data memory levels from the graph.
+
 ### 1.1.1
 
 This release comes with a few tweaks to the appearance of the component graphs and fixes several bugs related to graph drawing and config file parsing.

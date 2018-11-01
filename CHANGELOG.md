@@ -3,6 +3,18 @@ All notable changes to the "opensmile-config-files" extension will be documented
 
 ## [Unreleased]
 
+## [1.2.0] - 2018-11-02
+### Added
+- Component nodes in the graph are now colored according to their category (source/sink/data processor/functionals)
+- Option to hide the data memory levels from the graph
+- Controls for zooming in/out and resetting the view of the graph
+
+### Changed
+- Break up component node labels in the graph into two lines
+
+### Fixed
+- Edges in graph denoting sending of smile messages are now drawn in the correct style
+
 ## [1.1.1] - 2018-10-23
 ### Changed
 - Improve the loading speed of the component graph
@@ -10,7 +22,6 @@ All notable changes to the "opensmile-config-files" extension will be documented
 - Show status text while graph is still loading
 
 ### Fixed
-
 - Fix bug where the graph would not be drawn if a component sent messages to multiple recipients
 - Fix bug where the graph would not be drawn if a specified message recipient did not exist
 - Fix bug where whitespace at the end of field assignments would not be discarded
