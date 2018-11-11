@@ -68,8 +68,11 @@ export class OSCDiagnostics {
 					let fieldValue = component.getFieldValue(fieldInfo.field);
 					if (!fieldValue || !fieldValue.assignment) {
 						let diagnosticRange = component.sectionHeaders[component.sectionHeaders.length - 1].componentInstanceRange;
-						let diagnosticMessage = `Field "${fieldInfo.field}" of ${component.componentType} instance "${component.instanceName}" is required.`;
-						diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						let diagnosticRangeDocument = component.sectionHeaders[component.sectionHeaders.length - 1].document;
+						if (diagnosticRangeDocument.uri === document.uri) {
+							let diagnosticMessage = `Field "${fieldInfo.field}" of ${component.componentType} instance "${component.instanceName}" is required.`;
+							diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						}
 					}
 				}
 			}			
@@ -87,13 +90,18 @@ export class OSCDiagnostics {
 					}
 					if (fieldValue.value !== fieldInfo.recommendedValue) {
 						let diagnosticRange: vscode.Range;
+						let diagnosticRangeDocument: vscode.TextDocument;
 						if (!fieldValue.assignment) {
 							diagnosticRange = component.sectionHeaders[component.sectionHeaders.length - 1].componentInstanceRange;
+							diagnosticRangeDocument = component.sectionHeaders[component.sectionHeaders.length - 1].document;
 						} else {
 							diagnosticRange = fieldValue.assignment.valueRange;
+							diagnosticRangeDocument = fieldValue.assignment.document;
 						}
-						let diagnosticMessage = `Field "${fieldInfo.field}" of ${component.componentType} instance "${component.instanceName}" should be set to "${fieldInfo.recommendedValue}" to disable backward-compatibility behavior.`;
-						diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Warning));
+						if (diagnosticRangeDocument.uri === document.uri) {
+							let diagnosticMessage = `Field "${fieldInfo.field}" of ${component.componentType} instance "${component.instanceName}" should be set to "${fieldInfo.recommendedValue}" to disable backward-compatibility behavior.`;
+							diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Warning));
+						}
 					}
 				}
 			}
@@ -116,13 +124,19 @@ export class OSCDiagnostics {
 				if (fieldValue !== undefined) {
 					if (fieldValue.value !== component.componentType) {
 						let diagnosticRange = component.sectionHeaders[0].componentTypeRange;
-						let diagnosticMessage = `Component "${component.instanceName}" was declared with type ${fieldValue.value} but type ${component.componentType} was specified in the component section header.`;
-						diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						let diagnosticRangeDocument = component.sectionHeaders[0].document;
+						if (diagnosticRangeDocument.uri === document.uri) {
+							let diagnosticMessage = `Component "${component.instanceName}" was declared with type ${fieldValue.value} but type ${component.componentType} was specified in the component section header.`;
+							diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						}
 					}
 				} else {
 					let diagnosticRange = component.sectionHeaders[0].componentInstanceRange;
-					let diagnosticMessage = `Declaration of component "${component.instanceName}" is missing. This component will be ignored by openSMILE.`;
-					diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Warning));
+					let diagnosticRangeDocument = component.sectionHeaders[0].document;
+					if (diagnosticRangeDocument.uri === document.uri) {
+						let diagnosticMessage = `Declaration of component "${component.instanceName}" is missing. This component will be ignored by openSMILE.`;
+						diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Warning));
+					}
 				}
 			}
 		}
@@ -137,8 +151,11 @@ export class OSCDiagnostics {
 					// we give no error for dataMemory:cDataMemory as this component usually never has a section
 					if (!component && !(instanceName === 'dataMemory' && componentType === 'cDataMemory')) {
 						let diagnosticRange = new vscode.Range(assignment.fieldRange.start.translate(0, 9), assignment.fieldRange.end.translate(0, -6));
-						let diagnosticMessage = `Component section missing for declared component "${instanceName}".`;
-						diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						let diagnosticRangeDocument = assignment.document;
+						if (diagnosticRangeDocument.uri === document.uri) {
+							let diagnosticMessage = `Component section missing for declared component "${instanceName}".`;
+							diagnostics.push(new Diagnostic(diagnosticRange, diagnosticMessage, vscode.DiagnosticSeverity.Error));
+						}
 					}
 				}
 			}
