@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import path = require('path');
 import fs = require('fs');
-import { TextDocument, Range } from "vscode";
+import { TextDocument, Range, Uri } from "vscode";
 import { symbolCache, FieldInfo } from "./symbolCache";
 
 export class ConfigParserContext {
@@ -69,9 +69,9 @@ export class FieldAssignmentContext extends ConfigParserContext {
 }
 
 export class IncludeDirectiveContext extends ConfigParserContext {
-    private static regex = /^\s*\\\{(.+)\}/;
+    private static regex = /^(\s*\\\{)(.+)\}/;
 
-    private constructor(document: TextDocument, line: number, public fileName: string) {
+    private constructor(document: TextDocument, line: number, public fileName: string, public fileNameRange: Range) {
         super(document, line);
     }
 
@@ -82,8 +82,11 @@ export class IncludeDirectiveContext extends ConfigParserContext {
         if (!match) {
             return undefined;
         }
-        let fileName = match[1];
-        return new IncludeDirectiveContext(document, line, fileName);
+        let fileName = match[2];
+        let fileNameRangeStart = textLine.range.start.translate(0, match[1].length);
+        let fileNameRangeEnd = fileNameRangeStart.translate(0, fileName.length);
+        let fileNameRange = new Range(fileNameRangeStart, fileNameRangeEnd);
+        return new IncludeDirectiveContext(document, line, fileName, fileNameRange);
     }
 }
 
@@ -234,19 +237,26 @@ export class ConfigParser {
         return new ConfigParserContext(document, line);
     }
 
+    public resolveIncludeDirective(parserContext: IncludeDirectiveContext): Uri {
+        return this.resolveIncludePath(parserContext.fileName, parserContext.document);
+    }
+
+    public resolveIncludePath(fileName: string, document: TextDocument): Uri {
+        if (path.isAbsolute(fileName)) {
+            return Uri.file(fileName);
+        } else {
+            return Uri.file(path.join(path.dirname(document.fileName), fileName));
+        }
+        // TODO: before giving up, openSMILE also tries interpreting the path as relative to the last included file 
+    }
+
     public async iterate(document: TextDocument, descendIntoIncludedFiles: boolean, callback: (parserContext: ConfigParserContext) => any): Promise<void> {
         for (let line = 0; line < document.lineCount; line++) {
             let parserContext = configParser.getContext(document, line);
             if (parserContext instanceof IncludeDirectiveContext && descendIntoIncludedFiles) {
-                let fullPath: string;
-                if (path.isAbsolute(parserContext.fileName)) {
-                    fullPath = parserContext.fileName;
-                } else {
-                    fullPath = path.join(path.dirname(document.fileName), parserContext.fileName);
-                }
-                // TODO: before giving up, openSMILE also tries interpreting the path as relative to the last included file 
-                if (fs.existsSync(fullPath)) {
-                    let includedDocument = await vscode.workspace.openTextDocument(fullPath);
+                let uri: Uri = this.resolveIncludeDirective(parserContext);
+                if (fs.existsSync(uri.fsPath)) {
+                    let includedDocument = await vscode.workspace.openTextDocument(uri);
                     await this.iterate(includedDocument, descendIntoIncludedFiles, callback);
                 }       
             } else {
