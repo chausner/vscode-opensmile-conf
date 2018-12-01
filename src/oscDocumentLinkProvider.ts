@@ -1,12 +1,12 @@
 'use strict';
 
-import { TextDocument, CancellationToken, ProviderResult, DocumentLink, DocumentLinkProvider, Uri, Range } from 'vscode';
+import { TextDocument, CancellationToken, DocumentLink, DocumentLinkProvider, Uri, Range } from 'vscode';
 import { configParser, IncludeDirectiveContext } from './configParser';
 
 export class OSCDocumentLinkProvider implements DocumentLinkProvider {
-    provideDocumentLinks(document: TextDocument, token: CancellationToken): ProviderResult<DocumentLink[]> {
+    async provideDocumentLinks(document: TextDocument, token: CancellationToken): Promise<DocumentLink[]> {
         let links: DocumentLink[] = [];
-        configParser.iterate(document, false, parserContext => {
+        await configParser.iterate(document, false, parserContext => {
             if (parserContext instanceof IncludeDirectiveContext) {
                 if (!parserContext.fileName.includes('\\cm[')) {
                     let uri: Uri = configParser.resolveIncludeDirective(parserContext);

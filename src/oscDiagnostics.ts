@@ -10,7 +10,7 @@ export class OSCDiagnostics {
     public static async apply(document: TextDocument): Promise<void> {
 		let diagnostics: Diagnostic[] = [];
 
-		this.checkComponentTypesAndFieldsExist(document, diagnostics);
+		await this.checkComponentTypesAndFieldsExist(document, diagnostics);
 		await this.checkRequiredFieldsArePresent(document, diagnostics);
 		await this.warnForBackwardCompatibilityFlags(document, diagnostics);
 		await this.checkDeclarationsAndSections(document, diagnostics);
@@ -18,8 +18,8 @@ export class OSCDiagnostics {
 		diagnosticCollection.set(document.uri, diagnostics);
 	}
 
-	private static checkComponentTypesAndFieldsExist(document: TextDocument, diagnostics: Diagnostic[]) {
-		configParser.iterate(document, false, parserContext => {
+	private static async checkComponentTypesAndFieldsExist(document: TextDocument, diagnostics: Diagnostic[]) {
+		return configParser.iterate(document, false, parserContext => {
 			if (parserContext instanceof SectionHeaderContext) {
 				if (!symbolCache.components.has(parserContext.componentType)) {
 					diagnostics.push(new Diagnostic(parserContext.componentTypeRange, `Component with name "${parserContext.componentType}" does not exist.`, vscode.DiagnosticSeverity.Error));
