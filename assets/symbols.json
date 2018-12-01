@@ -124,6 +124,7 @@
         {
           "default": "___shs__dummy__", 
           "field": "dmLevel", 
+          "typeHint": "dmLevel", 
           "type": "string", 
           "description": "The data memory level this writer will write data to. You can specify any name here, this writer will register and create a level of this name in the dataMemory during initialisation of openSMILE. Please be aware of the fact that only one writer can write to a data memory level, therefore you are not allowed to use the same name again in a 'dmLevel' option of any other component in the same config."
         }, 
@@ -6648,6 +6649,7 @@
         {
           "default": null, 
           "field": "dmLevel", 
+          "typeHint": "dmLevel", 
           "type": "string", 
           "description": "The data memory level this writer will write data to. You can specify any name here, this writer will register and create a level of this name in the dataMemory during initialisation of openSMILE. Please be aware of the fact that only one writer can write to a data memory level, therefore you are not allowed to use the same name again in a 'dmLevel' option of any other component in the same config."
         }, 
