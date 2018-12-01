@@ -285,6 +285,8 @@ export class ConfigParser {
                 if (!currentComponent) {
                     currentComponent = new Component([parserContext], []);
                     components.set(currentComponent.instanceName, currentComponent);
+                } else {
+                    currentComponent.sectionHeaders.push(parserContext);
                 }
             } else if (parserContext instanceof FieldAssignmentContext) {
                 if (currentComponent) {
