@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerReferenceProvider('opensmileconf', new OSCReferenceProvider()));
     context.subscriptions.push(vscode.languages.registerFoldingRangeProvider('opensmileconf', new OSCFoldingRangeProvider()));
     context.subscriptions.push(vscode.languages.registerDocumentLinkProvider('opensmileconf', new OSCDocumentLinkProvider()));
-    context.subscriptions.push(vscode.commands.registerCommand('opensmile-config-files.showGraph', showGraphCommand));
+    context.subscriptions.push(vscode.commands.registerTextEditorCommand('opensmile-config-files.showGraph', showGraphCommand));
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(onDidChangeConfiguration));
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(onDidChangeTextDocument));
@@ -79,6 +79,6 @@ function loadSymbolCache() {
     }
 }
 
-function showGraphCommand(args?: any) {
-    new GraphDrawing().showGraph();
+function showGraphCommand(textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit, ...args: any[]) {
+    new GraphDrawing().showGraph(textEditor);
 }

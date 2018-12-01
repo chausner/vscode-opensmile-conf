@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TextDocument } from 'vscode';
+import { TextDocument, TextEditor } from 'vscode';
 import fs = require('fs');
 import path = require('path');
 import dagre = require('dagre');
@@ -8,9 +8,8 @@ import { extensionContext } from './extension';
 import { symbolCache } from './symbolCache';
 
 export class GraphDrawing {
-    public async showGraph(): Promise<void> {
-        let textEditor = vscode.window.activeTextEditor;
-        if (!textEditor || textEditor.document.languageId !== 'opensmileconf') {
+    public async showGraph(textEditor: TextEditor): Promise<void> {
+        if (textEditor.document.languageId !== 'opensmileconf') {
             await vscode.window.showErrorMessage('To run this command, an openSMILE configuration file must be loaded in the active editor.');
             return;
         }        
