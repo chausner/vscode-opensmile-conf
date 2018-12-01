@@ -57,6 +57,11 @@
 				{
 					"name": "comment.line.semicolon.opensmileconf",
 					"match": "^\\s*(;.*)$"
+				},
+				{
+					"name": "comment.block.opensmileconf",
+					"begin": "(/\\*.*)",
+					"end": "(.*\\*/)"
 				}
 			]
 		},
