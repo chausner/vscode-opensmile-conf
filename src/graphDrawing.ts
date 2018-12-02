@@ -68,7 +68,7 @@ export class GraphDrawing {
     private async buildGraph(document: TextDocument, excludeLevels: boolean): Promise<dagre.graphlib.Graph> {
         let components = await configParser.parse(document);
 
-        var g = new dagre.graphlib.Graph();
+        let g = new dagre.graphlib.Graph();
 
         // set graph properties
         g.setGraph({

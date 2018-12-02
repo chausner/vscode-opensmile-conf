@@ -194,7 +194,7 @@ export class Component {
     private static parseFieldExpression(field: string): ({ field: string } | { index: string })[] | undefined {
         let parts: ({ field: string } | { index: string })[] = [];
 
-        var i = 0;
+        let i = 0;
         while (i < field.length) {
             let match = /^[a-zA-Z0-9_]+/.exec(field.substr(i));
             if (match) {
