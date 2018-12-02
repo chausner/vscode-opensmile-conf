@@ -90,6 +90,34 @@ export class IncludeDirectiveContext extends ConfigParserContext {
     }
 }
 
+export class BlockCommentStartContext extends ConfigParserContext {
+    private static regex = /^\s*\/\*.*/;
+
+    public static from(document: TextDocument, line: number): BlockCommentStartContext | undefined {
+        let textLine = document.lineAt(line);
+        let text = textLine.text;
+        let match = this.regex.exec(text);       
+        if (!match) {
+            return undefined;
+        }
+        return new BlockCommentStartContext(document, line);
+    }
+}
+
+export class BlockCommentEndContext extends ConfigParserContext {
+    private static regex = /\*\/\s*$/;
+
+    public static from(document: TextDocument, line: number): BlockCommentEndContext | undefined {
+        let textLine = document.lineAt(line);
+        let text = textLine.text;
+        let match = this.regex.exec(text);       
+        if (!match) {
+            return undefined;
+        }
+        return new BlockCommentEndContext(document, line);
+    }
+}
+
 export class Component {
     constructor(public sectionHeaders: SectionHeaderContext[], public fieldAssignments: FieldAssignmentContext[]) {}
 
@@ -221,20 +249,14 @@ export class Component {
 
 export class ConfigParser {
     public getContext(document: TextDocument, line: number): ConfigParserContext {
-        let context;
-        context = SectionHeaderContext.from(document, line);
-        if (context) {
-            return context;
-        }
-        context = FieldAssignmentContext.from(document, line);
-        if (context) {
-            return context;
-        }
-        context = IncludeDirectiveContext.from(document, line);
-        if (context) {
-            return context;
-        }
-        return new ConfigParserContext(document, line);
+        return (
+            BlockCommentStartContext.from(document, line) ||
+            BlockCommentEndContext.from(document, line) ||
+            FieldAssignmentContext.from(document, line) ||
+            SectionHeaderContext.from(document, line) || 
+            IncludeDirectiveContext.from(document, line) ||            
+            new ConfigParserContext(document, line) 
+        );
     }
 
     public resolveIncludeDirective(parserContext: IncludeDirectiveContext): Uri {
@@ -251,25 +273,39 @@ export class ConfigParser {
     }
 
     public async iterate(document: TextDocument, descendIntoIncludedFiles: boolean, callback: (parserContext: ConfigParserContext) => any): Promise<void> {
+        let inBlockComment = false;
         for (let line = 0; line < document.lineCount; line++) {
             let parserContext = configParser.getContext(document, line);
-            if (parserContext instanceof IncludeDirectiveContext && descendIntoIncludedFiles) {
-                let uri: Uri = this.resolveIncludeDirective(parserContext);
-                if (fs.existsSync(uri.fsPath)) {
-                    let includedDocument = await vscode.workspace.openTextDocument(uri);
-                    await this.iterate(includedDocument, descendIntoIncludedFiles, callback);
-                }       
-            } else {
-                callback(parserContext);
+            if (parserContext instanceof BlockCommentStartContext) {
+                inBlockComment = true;
+            } else if (parserContext instanceof BlockCommentEndContext) {
+                inBlockComment = false;
+            } else if (!inBlockComment) {
+                if (parserContext instanceof IncludeDirectiveContext && descendIntoIncludedFiles) {
+                    let uri: Uri = this.resolveIncludeDirective(parserContext);
+                    if (fs.existsSync(uri.fsPath)) {
+                        let includedDocument = await vscode.workspace.openTextDocument(uri);
+                        await this.iterate(includedDocument, descendIntoIncludedFiles, callback);
+                    }    
+                } else {
+                    callback(parserContext);
+                }
             }
         }
     }
 
     public findParentSectionHeaderContext(document: TextDocument, line: number): SectionHeaderContext | undefined {
+        let inBlockComment = false;
         for (let l = line; l >= 0; l--) {
-            let c = this.getContext(document, l);
-            if (c instanceof SectionHeaderContext) {
-                return c;
+            let parserContext = this.getContext(document, l);
+            if (parserContext instanceof BlockCommentEndContext) {
+                inBlockComment = true;
+            } else if (parserContext instanceof BlockCommentStartContext) {
+                inBlockComment = false;
+            } else if (!inBlockComment) {
+                if (parserContext instanceof SectionHeaderContext) {
+                    return parserContext;
+                }
             }
         }
         return undefined;
