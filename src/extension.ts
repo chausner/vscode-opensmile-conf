@@ -11,6 +11,7 @@ import { OSCDocumentLinkProvider } from './oscDocumentLinkProvider';
 import { symbolCache } from './symbolCache';
 import { GraphDrawing } from './graphDrawing';
 import { OSCDiagnostics } from './oscDiagnostics';
+import { OSCRenameProvider } from './oscRenameProvider';
 
 export let extensionContext: vscode.ExtensionContext;
 export let diagnosticCollection: vscode.DiagnosticCollection;
@@ -29,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerReferenceProvider('opensmileconf', new OSCReferenceProvider()));
     context.subscriptions.push(vscode.languages.registerFoldingRangeProvider('opensmileconf', new OSCFoldingRangeProvider()));
     context.subscriptions.push(vscode.languages.registerDocumentLinkProvider('opensmileconf', new OSCDocumentLinkProvider()));
+    context.subscriptions.push(vscode.languages.registerRenameProvider('opensmileconf', new OSCRenameProvider()));
     context.subscriptions.push(vscode.commands.registerTextEditorCommand('opensmile-config-files.showGraph', showGraphCommand));
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(onDidChangeConfiguration));
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(onDidOpenTextDocument));
