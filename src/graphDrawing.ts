@@ -3,7 +3,7 @@ import { TextDocument, TextEditor } from 'vscode';
 import fs = require('fs');
 import path = require('path');
 import dagre = require('dagre');
-import { configParser, SectionHeaderContext, Component } from './configParser';
+import { configParser, SectionHeaderContext, Component, FieldAssignmentContext } from './configParser';
 import { extensionContext } from './extension';
 import { symbolCache } from './symbolCache';
 
@@ -43,12 +43,18 @@ export class GraphDrawing {
                     graph: graphJson
                 });
             } else if (message.id === 'nodeClicked') {
-                let node = (graph as dagre.graphlib.Graph).node(message.nodeName);
-                if (node.class.endsWith('component')) {
-                    let definitionLocation: SectionHeaderContext = node.definitionLocation;
+                let node = (graph as dagre.graphlib.Graph).node(message.nodeName);           
+                if (node.class.endsWith('component') || node.class === 'level') {
+                    let definitionLocation = node.definitionLocation as SectionHeaderContext | FieldAssignmentContext;                    
+                    let range: vscode.Range;
+                    if (definitionLocation instanceof SectionHeaderContext) {
+                        range = definitionLocation.componentInstanceRange;
+                    } else {
+                        range = definitionLocation.valueRange;
+                    } 
                     vscode.window.showTextDocument(definitionLocation.document, { 
                         viewColumn: (textEditor as vscode.TextEditor).viewColumn,
-                        selection: definitionLocation.componentInstanceRange,
+                        selection: range,
                         preserveFocus: true, 
                         preview: true
                     });
@@ -94,8 +100,9 @@ export class GraphDrawing {
         }
 
         let levels: Set<string> = new Set<string>();
-        let readersOfLevels: Map<string, string[]> = new Map<string, string[]>();
-        let writersOfLevels: Map<string, string[]> = new Map<string, string[]>();
+        let readersOfLevels: Map<string, string[]> = new Map();
+        let writersOfLevels: Map<string, string[]> = new Map();
+        let definitionLocationOfLevels: Map<string, FieldAssignmentContext | SectionHeaderContext> = new Map();
 
         for (let component of components) {
             let componentInfo = symbolCache.lookupComponent(component.componentType);
@@ -130,6 +137,11 @@ export class GraphDrawing {
                                 levels.add(level);
                                 if (!writersOfLevels.has(level)) {
                                     writersOfLevels.set(level, [component.instanceName]);
+                                    if (fieldValue.assignment) {
+                                        definitionLocationOfLevels.set(level, fieldValue.assignment);
+                                    } else {
+                                        definitionLocationOfLevels.set(level, component.sectionHeaders[0]);
+                                    }
                                 } else {
                                     (writersOfLevels.get(level) as string[]).push(component.instanceName);
                                 }
@@ -167,7 +179,8 @@ export class GraphDrawing {
                 g.setNode('level_' + level, { 
                     label: level,
                     shape: 'ellipse', 
-                    class: 'level' 
+                    class: 'level', 
+                    definitionLocation: definitionLocationOfLevels.get(level)
                 });
             }
         } else {
