@@ -1,6 +1,6 @@
 # openSMILE Config Files
 
-This extension adds syntax highlighting, diagnostics and IntelliSense features for openSMILE configuration files (.conf, .inc) to Visual Studio Code.
+This extension adds syntax highlighting, diagnostics, IntelliSense and refactoring features for openSMILE configuration files (.conf, .inc) to Visual Studio Code.
 
 > Note: this software is not developed or officially supported by audEERING GmbH.
 
@@ -8,14 +8,15 @@ This extension adds syntax highlighting, diagnostics and IntelliSense features f
 
 ### Statement completion with symbol information for components, fields and levels
 
-The component help system of openSMILE is integrated into the IDE. Completion lists are available for component types and instances, field names, field enumeration values and data memory levels.
+The extension integrates the component help system of openSMILE right into the IDE, making it much easier to explore the functionality of openSMILE and to edit or create config files. Statement completion is available for component types and instances, field names, field enumeration values and data memory levels.
 
 ![feature X](images/completion.gif)
 
 ### Navigation
 
-* Go to definition of a component or writer of a data memory level
-* Find all references (readers and writers) to data memory level
+* Go to the definition of a component or writer of a data memory level
+* Find all references (readers and writers) to a data memory level
+* Open the referenced document in include directives
 
 ### Diagnostics 
 
@@ -25,9 +26,11 @@ The component help system of openSMILE is integrated into the IDE. Completion li
 
 ### Graph visualization of the data flow between components
 
-Press `Ctrl+Shift+P` and run command `openSMILE Config Files: Show component graph` to visualize the currently open configuration file as a graph. Components are depicted as rectangular nodes, data memory levels as ellipses. Edges in the graph indicate components reading from or writing to a level. Click on a component node in the graph to navigate to its location in source.
+Open a config file and press `Ctrl+Alt+G` to visualize the data flow as a graph. Components are depicted as rectangular nodes, data memory levels as ellipses. Edges in the graph indicate components reading from or writing to a level. Click on a node in the graph to navigate to its location in source.
 
 ![feature X](images/graph.png)
+
+Uncheck the option `Show data memory levels` to obtain a simpler graph structure where data memory levels are not included as separate nodes.
 
 ## Extension Settings
 
@@ -36,6 +39,10 @@ This extension can be customized using the following settings:
 * `opensmile-config-files.symbolsPath`: path to a custom `symbols.json` containing symbol information
 
 ## Release Notes
+
+### 1.3.0
+
+This release introduces several new features, including support for name refactoring of component instances and levels, clickable hyperlinks for include paths, and the ability to refresh the component graph view. There is now a keyboard shortcut (Ctrl+Alt+G) for showing the component graph. Levels that have no readers or a writer associated with them are now marked in the graph, and clicking on level nodes navigates to the location where they are defined. This release also fixes issues concerning block comments and display of diagnostics, see CHANGELOG.md for details.
 
 ### 1.2.0
 

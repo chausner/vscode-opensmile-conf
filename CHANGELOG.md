@@ -3,6 +3,19 @@ All notable changes to the "opensmile-config-files" extension will be documented
 
 ## [Unreleased]
 
+## [1.3.0] - 2018-12-09
+## Added
+- Make paths in include directives clickable hyperlinks to the included file
+- Support renaming of component instances and data memory levels
+- Navigate to the definition location of levels when clicking on their nodes in the graph
+- Add a refresh button to the graph view
+- Highlight levels in graph that have no readers or writer
+- It's now possible to show the component graph using the keyboard shortcut Ctrl+Alt+G
+
+## Fixed
+- Fix bug where diagnostics relating to a included file would show up in the wrong document
+- The content of block comments are now ignored by the parser and shown with correct syntax highlighting
+
 ## [1.2.0] - 2018-11-02
 ### Added
 - Component nodes in the graph are now colored according to their category (source/sink/data processor/functionals)
