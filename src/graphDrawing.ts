@@ -16,7 +16,7 @@ export class GraphDrawing {
         let document = textEditor.document;
         
         let graph: dagre.graphlib.Graph | undefined;        
-        let graphPromise: Promise<dagre.graphlib.Graph> = this.buildGraph(document, false);
+        let graphPromise: Promise<dagre.graphlib.Graph> | undefined = this.buildGraph(document, false);
 
         let title: string;
         if (!document.isUntitled) {
@@ -33,7 +33,10 @@ export class GraphDrawing {
         webviewPanel.webview.onDidReceiveMessage(async message => {
             if (message.id === 'generateGraph') {
                 if (graphPromise !== undefined && message.excludeLevels === false) {
+                    // for the first generateGraph event we start building the graph in advance to save some time
+                    // for any following generateGraph event, we rebuild it on-demand
                     graph = await graphPromise;
+                    graphPromise = undefined;
                 } else {
                     graph = await this.buildGraph(document, message.excludeLevels);
                 }      
