@@ -47,7 +47,7 @@ export class GraphDrawing {
                 });
             } else if (message.id === 'nodeClicked') {
                 let node = (graph as dagre.graphlib.Graph).node(message.nodeName);           
-                if (node.class.endsWith('component') || node.class === 'level') {
+                if (node.class.endsWith('component') || node.class.startsWith('level')) {
                     let definitionLocation = node.definitionLocation as SectionHeaderContext | FieldAssignmentContext;                    
                     let range: vscode.Range;
                     if (definitionLocation instanceof SectionHeaderContext) {
@@ -179,10 +179,14 @@ export class GraphDrawing {
 
         if (!excludeLevels) {
             for (let level of levels) {
+                let cls = 'level';
+                if (!readersOfLevels.has(level) || !writersOfLevels.has(level)) {
+                    cls += ' orphaned';
+                }         
                 g.setNode('level_' + level, { 
                     label: level,
                     shape: 'ellipse', 
-                    class: 'level', 
+                    class: cls,
                     definitionLocation: definitionLocationOfLevels.get(level)
                 });
             }
@@ -223,7 +227,7 @@ export class GraphDrawing {
             case 'cDataProcessor': 
                 return "blue-component";        
             case "cFunctionals":
-                return "yellow-component";
+                return "yellow-component";        
             default: 
                 return 'blue-component';            
         }
