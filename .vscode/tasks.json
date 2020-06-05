@@ -23,6 +23,13 @@
 			"problemMatcher": [],
 			"label": "npm: compile",
 			"detail": "tsc -p ./"
+		},
+		{
+			"type": "npm",
+			"script": "lint",
+			"problemMatcher": ["$eslint-stylish"],
+			"label": "npm: lint",
+			"detail": "eslint src --ext ts"
 		}
 	]
 }

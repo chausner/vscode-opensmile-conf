@@ -18,7 +18,7 @@
     "activationEvents": [
         "onLanguage:opensmileconf"
     ],
-    "main": "./out/extension",
+    "main": "./out/extension.js",
     "contributes": {
         "languages": [
             {
@@ -77,19 +77,20 @@
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+        "lint": "eslint src --ext ts",
+        "watch": "tsc -watch -p ./"
     },
     "devDependencies": {
-        "@types/mocha": "^2.2.42",
-        "@types/node": "^7.0.43",
-        "tslint": "^5.8.0",
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.6"
+        "@types/node": "^7.10.11",
+        "@types/vscode": "^1.23.0",
+        "@typescript-eslint/eslint-plugin": "^2.30.0",
+        "@typescript-eslint/parser": "^2.30.0",
+        "commander": "^5.1.0",
+        "eslint": "^6.8.0",
+        "typescript": "^3.9.5"
     },
     "dependencies": {
-        "@types/dagre": "^0.7.40",
-        "dagre": "^0.8.2"
+        "@types/dagre": "^0.7.44",
+        "dagre": "^0.8.5"
     }
 }

@@ -100,7 +100,7 @@ let baseComponents: any = {
 
 let program = 
     commander
-    .option('--smilextract-path [path]', 'path to the SMILExtract binary of openSMILE', undefined, 'SMILExtract')
+    .option('--smilextract-path [path]', 'path to the SMILExtract binary of openSMILE', 'SMILExtract')
     .option('-o, --output-path <path>', 'path where to save the generated JSON file with symbol information')
     .parse(process.argv);
 

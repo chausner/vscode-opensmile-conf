@@ -47,8 +47,8 @@ export class GraphDrawing {
                 });
             } else if (message.id === 'nodeClicked') {
                 let node = (graph as dagre.graphlib.Graph).node(message.nodeName);           
-                if (node.class.endsWith('component') || node.class.startsWith('level')) {
-                    let definitionLocation = node.definitionLocation as SectionHeaderContext | FieldAssignmentContext;                    
+                if (node.class?.endsWith('component') || node.class?.startsWith('level')) {
+                    let definitionLocation = (node as any).definitionLocation as SectionHeaderContext | FieldAssignmentContext;                    
                     let range: vscode.Range;
                     if (definitionLocation instanceof SectionHeaderContext) {
                         range = definitionLocation.componentInstanceRange;
