@@ -1,8 +1,11 @@
 # openSMILE Config Files
 
+![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/chausner.opensmile-config-files)
+![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/chausner.opensmile-config-files)
+
 This extension adds syntax highlighting, diagnostics, IntelliSense and refactoring features for openSMILE configuration files (.conf, .inc) to Visual Studio Code.
 
-> Note: this software is not developed or officially supported by audEERING GmbH.
+[Get this extension in the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=chausner.opensmile-config-files)
 
 ## Features
 
