@@ -1,7 +1,9 @@
 # Change Log
 All notable changes to the "opensmile-config-files" extension will be documented in this file.
 
-## [Unreleased]
+## [1.4.0] - 2020-11-01
+## Changed
+- Update symbol information for openSMILE 3.0
 
 ## [1.3.0] - 2018-12-09
 ## Added

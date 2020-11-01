@@ -43,6 +43,10 @@ This extension can be customized using the following settings:
 
 ## Release Notes
 
+### 1.4.0
+
+This release comes with updated symbol information for openSMILE 3.0.
+
 ### 1.3.0
 
 This release introduces several new features, including support for name refactoring of component instances and levels, clickable hyperlinks for include paths, and the ability to refresh the component graph view. There is now a keyboard shortcut (Ctrl+Alt+G) for showing the component graph. Levels that have no readers or a writer associated with them are now marked in the graph, and clicking on level nodes navigates to the location where they are defined. This release also fixes issues concerning block comments and display of diagnostics, see CHANGELOG.md for details.
