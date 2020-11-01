@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// node .\out\symbolImporter.js -o assets\symbols_imported.json --smilextract-path C:\Users\chris\Downloads\opensmile-2.3.0\bin\Win32\SMILExtract_ReleasePortaudio.exe
+// node .\out\symbolImporter.js -o assets\symbols_imported.json --smilextract-path "C:\Users\chris\Downloads\opensmile-3.0-win-x64\bin\SMILExtract.exe"
 
 import commander = require('commander');
 import fs = require('fs');
@@ -96,6 +96,12 @@ let baseComponents: any = {
     openCVSource: 'cDataSource',
     tonespec: 'cVectorProcessor',
     chroma: 'cVectorProcessor',
+    vectorBinaryOperation: 'cDataProcessor',
+    externalSink: 'cDataSink',
+    externalSource: 'cDataSource',
+    externalAudioSource: 'cDataSource',
+    dataPrintSink: 'cDataSink',
+    ffmpegSource: 'cDataSource',
 };
 
 let program = 
